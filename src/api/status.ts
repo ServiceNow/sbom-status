@@ -11,6 +11,9 @@ import * as statusUtils from "@/src/api/status";
 export function generateStatusUrl(actionArguments: StatusActionArguments) {
   let statusSearchParams = new URLSearchParams();
   statusSearchParams.append("bomRecordId", actionArguments.bomRecordId);
+
+  console.log("Bom Record ID: ", actionArguments.bomRecordId);
+
   let url = new URL(
     "/api/sbom/core/upload/status",
     actionArguments.secrets.snInstanceUrl,

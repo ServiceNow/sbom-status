@@ -31183,6 +31183,7 @@ const statusUtils = __importStar(__nccwpck_require__(5938));
 function generateStatusUrl(actionArguments) {
     let statusSearchParams = new URLSearchParams();
     statusSearchParams.append("bomRecordId", actionArguments.bomRecordId);
+    console.log("Bom Record ID: ", actionArguments.bomRecordId);
     let url = new URL("/api/sbom/core/upload/status", actionArguments.secrets.snInstanceUrl);
     url.search = statusSearchParams.toString();
     return url;

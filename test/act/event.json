@@ -1,0 +1,16 @@
+{
+  "action": "sbom-upload",
+  "inputs": {
+    "fetch-package-info": "true",
+    "fetch-vulnerability-info": "false",
+    "max-status-poll-attempts": "5",
+    "status-attempt-interval": "10000",
+    "gh-account-owner": "jack-gronenthal-sn",
+    "provider": "repository",
+    "repository": "github-action-consumer",
+    "path": "sboms/sample_sbom.json",
+    "business-application-id": "Some business application id",
+    "lifecycle_stage": "pre_production",
+    "product-model-id": "ProductModel:ACB"
+  }
+}
