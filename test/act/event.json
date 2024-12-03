@@ -2,9 +2,9 @@
   "action": "sbom-upload",
   "inputs": {
     "fetch-package-info": "true",
-    "fetch-vulnerability-info": "false",
+    "fetch-vulnerability-info": "true",
     "max-status-poll-attempts": "5",
-    "status-attempt-interval": "10000",
+    "status-attempt-interval": "30000",
     "gh-account-owner": "jack-gronenthal-sn",
     "provider": "repository",
     "repository": "github-action-consumer",

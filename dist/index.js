@@ -31182,24 +31182,23 @@ const process = __importStar(__nccwpck_require__(7742));
 const statusUtils = __importStar(__nccwpck_require__(5938));
 function generateStatusUrl(actionArguments) {
     let statusSearchParams = new URLSearchParams();
-    statusSearchParams.append("bomRecordId", actionArguments.bomRecordId);
-    console.log("Bom Record ID: ", actionArguments.bomRecordId);
-    let url = new URL("/api/sbom/core/upload/status", actionArguments.secrets.snInstanceUrl);
+    statusSearchParams.append('bomRecordId', actionArguments.bomRecordId);
+    let url = new URL('/api/sbom/core/upload/status', actionArguments.secrets.snInstanceUrl);
     url.search = statusSearchParams.toString();
     return url;
 }
 function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 async function status(actionArguments) {
     if (actionArguments.bomRecordId == undefined) {
-        throw new Error((0, errors_1.REQUEST_STATUS_ERROR_INSUFFICIENT_DATA)("Missing bomRecordId").message);
+        throw new Error((0, errors_1.REQUEST_STATUS_ERROR_INSUFFICIENT_DATA)('Missing bomRecordId').message);
     }
     let statusUrl = generateStatusUrl(actionArguments);
     let numPolls = 0;
     const MAX_NUM_POLLS = actionArguments.maxStatusPollAttempts;
     let pollHistory = [];
-    console.log("Polling processing status...");
+    console.log('Polling processing status...');
     const total = 100;
     const progressBar = new summary_1.default(total, MAX_NUM_POLLS);
     let current = 0;
@@ -31213,24 +31212,23 @@ async function status(actionArguments) {
         progressBar.update(current);
         core.debug(`Status attempt #${numPolls} response...`);
         core.debug(`${JSON.stringify(results, null, 2)}`);
-        core.debug("\n");
+        core.debug('\n');
         console.log(results);
-        if (results.result.status === "error") {
+        if (results.result.status === 'error') {
             throw new Error(`An error occurred: ${JSON.stringify(results.result, null, 2)}`);
         }
-        if (results.result.uploadStatus === "processed" &&
-            results.result.additionalInfoStatus === "not_requested" &&
+        if (results.result.uploadStatus === 'processed' &&
+            results.result.additionalInfoStatus === 'not_requested' &&
             doWaitForAdditionalInfo &&
             !alreadyEmittedAdditionalIntelligenceDiscrepancyWarning) {
-            core.warning("Additional vulnerability, package or license intelligence was requested; however, the API request that uploaded the SBOM document did not request additional information.");
+            core.warning('Additional vulnerability, package or license intelligence was requested; however, the API request that uploaded the SBOM document did not request additional information.');
             doWaitForAdditionalInfo = false;
             alreadyEmittedAdditionalIntelligenceDiscrepancyWarning = true;
         }
-        let haltingCondition = (results.result.uploadStatus === "processed" &&
-            !doWaitForAdditionalInfo) ||
-            (results.result.uploadStatus === "processed" &&
+        let haltingCondition = (results.result.uploadStatus === 'processed' && !doWaitForAdditionalInfo) ||
+            (results.result.uploadStatus === 'processed' &&
                 doWaitForAdditionalInfo &&
-                results.result.additionalInfoStatus === "complete");
+                results.result.additionalInfoStatus === 'complete');
         if (haltingCondition) {
             processingComplete = true;
             break;
@@ -31239,111 +31237,106 @@ async function status(actionArguments) {
     }
     let ultimatePoll = pollHistory.pop();
     if (!processingComplete) {
-        console.log("Timed out before completion...");
+        console.log('Timed out before completion...');
         await core.summary
-            .addRaw("**Last observed status state**: `" +
-            ultimatePoll?.result.uploadStatus +
-            "`")
-            .addQuote("⚠️️ The maximum status poll attempts has been reached. Please consider increasing the maximum number of poll attempts (maxStatusPollAttempts) or time between poll attempts (statusAttemptInterval) before re-running.")
-            .addHeading("Current Status Polling Configuration", 4)
+            .addRaw('**Last observed status state**: `' + ultimatePoll?.result.uploadStatus + '`')
+            .addQuote('⚠️️ The maximum status poll attempts has been reached. Please consider increasing the maximum number of poll attempts (maxStatusPollAttempts) or time between poll attempts (statusAttemptInterval) before re-running.')
+            .addHeading('Current Status Polling Configuration', 4)
             .addCodeBlock(JSON.stringify({
             maxStatusPollAttempts: actionArguments.maxStatusPollAttempts,
-            statusAttemptInterval: actionArguments.statusAttemptInterval,
-        }), "json")
+            statusAttemptInterval: actionArguments.statusAttemptInterval
+        }), 'json')
             .write();
-        core.setOutput("statusState", "timeout");
-        core.setFailed("The maximum status poll attempts has been reached.");
+        core.setOutput('statusState', 'timeout');
+        core.setFailed('The maximum status poll attempts has been reached.');
         return;
     }
-    if (process.env.NODE_ENV !== "test" && processingComplete) {
+    if (process.env.NODE_ENV !== 'test' && processingComplete) {
         let summary = core.summary
-            .addHeading("SBOM Processing Results")
-            .addQuote("✅ Successfully processed SBOM...")
-            .addHeading("Component Information", 4)
+            .addHeading('SBOM Processing Results')
+            .addQuote('✅ Successfully processed SBOM...')
+            .addHeading('Component Information', 4)
             .addTable([
             [
-                { data: "Added", header: true },
-                { data: "Removed", header: true },
-                { data: "Total", header: true },
+                { data: 'Added', header: true },
+                { data: 'Removed', header: true },
+                { data: 'Total', header: true }
             ],
             [
                 `${ultimatePoll?.result?.uploadSummary?.components?.added}`,
                 `${ultimatePoll?.result?.uploadSummary?.components?.removed}`,
-                `${ultimatePoll?.result?.uploadSummary?.components?.total}`,
-            ],
+                `${ultimatePoll?.result?.uploadSummary?.components?.total}`
+            ]
         ]);
-        if (actionArguments.fetchVulnerabilityInfo &&
-            ultimatePoll?.result.uploadSummary?.vulnerabilityInfo) {
-            summary.addHeading("Vulnerability Information", 4).addTable([
+        if (actionArguments.fetchVulnerabilityInfo && ultimatePoll?.result.uploadSummary?.vulnerabilityInfo) {
+            summary.addHeading('Vulnerability Information', 4).addTable([
                 [
-                    { data: "Critical", header: true },
-                    { data: "High", header: true },
-                    { data: "Medium", header: true },
-                    { data: "Low", header: true },
-                    { data: "None", header: true },
+                    { data: 'Critical', header: true },
+                    { data: 'High', header: true },
+                    { data: 'Medium', header: true },
+                    { data: 'Low', header: true },
+                    { data: 'None', header: true }
                 ],
                 [
                     `${ultimatePoll?.result?.uploadSummary?.vulnerabilityInfo?.critical}`,
                     `${ultimatePoll?.result?.uploadSummary?.vulnerabilityInfo?.high}`,
                     `${ultimatePoll?.result?.uploadSummary?.vulnerabilityInfo?.medium}`,
                     `${ultimatePoll?.result?.uploadSummary?.vulnerabilityInfo?.low}`,
-                    `${ultimatePoll?.result?.uploadSummary?.vulnerabilityInfo?.none}`,
-                ],
+                    `${ultimatePoll?.result?.uploadSummary?.vulnerabilityInfo?.none}`
+                ]
             ]);
         }
-        if (actionArguments.fetchPackageInfo &&
-            ultimatePoll?.result.uploadSummary?.packageInfo) {
-            summary.addHeading("Package Information", 4).addTable([
+        if (actionArguments.fetchPackageInfo && ultimatePoll?.result.uploadSummary?.packageInfo) {
+            summary.addHeading('Package Information', 4).addTable([
                 [
-                    { data: "Stale", header: true },
-                    { data: "Abandoned", header: true },
+                    { data: 'Stale', header: true },
+                    { data: 'Abandoned', header: true }
                 ],
                 [
                     `${ultimatePoll?.result?.uploadSummary?.packageInfo?.stale}`,
-                    `${ultimatePoll?.result?.uploadSummary?.packageInfo?.abandoned}`,
-                ],
+                    `${ultimatePoll?.result?.uploadSummary?.packageInfo?.abandoned}`
+                ]
             ]);
         }
-        if (actionArguments.fetchLicenseInfo &&
-            ultimatePoll?.result.uploadSummary?.licenseInfo) {
-            summary.addHeading("License Information", 4).addTable([
+        if (actionArguments.fetchLicenseInfo && ultimatePoll?.result.uploadSummary?.licenseInfo) {
+            summary.addHeading('License Information', 4).addTable([
                 [
-                    { data: "Permitted", header: true },
-                    { data: "Banned", header: true },
-                    { data: "Restricted", header: true },
-                    { data: "Classification Required", header: true },
-                    { data: "Unresolved", header: true },
+                    { data: 'Permitted', header: true },
+                    { data: 'Banned', header: true },
+                    { data: 'Restricted', header: true },
+                    { data: 'Classification Required', header: true },
+                    { data: 'Unresolved', header: true }
                 ],
                 [
                     `${ultimatePoll?.result?.uploadSummary?.licenseInfo?.permitted}`,
                     `${ultimatePoll?.result?.uploadSummary?.licenseInfo?.banned}`,
                     `${ultimatePoll?.result?.uploadSummary?.licenseInfo?.restricted}`,
                     `${ultimatePoll?.result?.uploadSummary?.licenseInfo?.classification_required}`,
-                    `${ultimatePoll?.result?.uploadSummary?.licenseInfo?.unresolved}`,
-                ],
+                    `${ultimatePoll?.result?.uploadSummary?.licenseInfo?.unresolved}`
+                ]
             ]);
         }
         await summary.write();
         if (!doWaitForAdditionalInfo) {
             await core.summary
                 .addSeparator()
-                .addQuote("ℹ️ If the SBOM was uploaded to ServiceNow via the SBOM Upload Action, additional package, vulnerability or license intelligence information can be requested. The SBOM Status API can retrieve the associated package, vulnerability or license information if the fetchPackageInfo, fetchVulnerabilityInfo or fetchLicenseInfo action inputs are set to true.")
+                .addQuote('ℹ️ If the SBOM was uploaded to ServiceNow via the SBOM Upload Action, additional package, vulnerability or license intelligence information can be requested. The SBOM Status API can retrieve the associated package, vulnerability or license information if the fetchPackageInfo, fetchVulnerabilityInfo or fetchLicenseInfo action inputs are set to true.')
                 .write();
         }
     }
-    core.setOutput("statusState", "complete");
+    core.setOutput('statusState', 'complete');
     return ultimatePoll;
 }
 async function _performStatus(statusUrl, snSbomUser, snSbomPassword) {
     return await fetch(statusUrl, {
         headers: {
-            "Content-Type": "application/json",
-            Authorization: `Basic ${Buffer.from(snSbomUser + ":" + snSbomPassword).toString("base64")}`,
-        },
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${Buffer.from(snSbomUser + ':' + snSbomPassword).toString('base64')}`
+        }
     })
-        .then((response) => response.json())
-        .then((data) => data)
-        .catch((error) => {
+        .then(response => response.json())
+        .then(data => data)
+        .catch(error => {
         core.warning(`An error occurred while retrieving status of SBOM: ${error.message}`);
         throw error;
     });
@@ -31399,15 +31392,14 @@ dotenv_1.default.config();
  */
 async function run() {
     try {
-        console.log("Hello, Sourav!");
         const actionArguments = (0, setup_1.setup)();
         await (0, validate_1.validate)(actionArguments, schemas_1.SchemaType.action_inputs);
         let statusOperationResponseObject = await (0, status_1.status)(actionArguments);
         if (statusOperationResponseObject == undefined) {
             return;
         } // Time out case, status function handles failing action
-        console.log("result", statusOperationResponseObject);
-        core.setOutput("apiResponseObject", JSON.stringify(statusOperationResponseObject));
+        console.log('result', statusOperationResponseObject);
+        core.setOutput('apiResponseObject', JSON.stringify(statusOperationResponseObject));
     }
     catch (error) {
         if (error instanceof Error)
@@ -31425,34 +31417,18 @@ async function run() {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.REQUEST_STATUS_ERROR_INSUFFICIENT_DATA = exports.REQUEST_BUILDER_ERROR_INSUFFICIENT_DATA = exports.INVALID_ARGS_FOR_REPOSITORY_FETCH = exports.FETCH_DEPENDENCY_GRAPH_STATUS_403 = exports.FETCH_DEPENDENCY_GRAPH_STATUS_404 = exports.INVALID_ARGS_FOR_DEPENDENCY_GRAPH_FETCH = exports.INVALID_INPUT_VALUES = exports.UNABLE_TO_RESOLVE_SCHEMA = void 0;
-exports.UNABLE_TO_RESOLVE_SCHEMA = {
-    message: "Unable to identify which schema to validate.",
-};
-const INVALID_INPUT_VALUES = (errors) => ({
-    message: `The provided input values are invalid. Please review inputs before continuing: ${JSON.stringify(errors)}`,
-});
+exports.UNABLE_TO_RESOLVE_SCHEMA = { message: 'Unable to identify which schema to validate.' };
+const INVALID_INPUT_VALUES = (errors) => ({ message: `The provided input values are invalid. Please review inputs before continuing: ${JSON.stringify(errors)}` });
 exports.INVALID_INPUT_VALUES = INVALID_INPUT_VALUES;
-exports.INVALID_ARGS_FOR_DEPENDENCY_GRAPH_FETCH = {
-    message: "Missing required argument for generating SBOM from target repository.",
-};
-const FETCH_DEPENDENCY_GRAPH_STATUS_404 = (error) => ({
-    message: `Could not find supplied resource: ${error}`,
-});
+exports.INVALID_ARGS_FOR_DEPENDENCY_GRAPH_FETCH = { message: 'Missing required argument for generating SBOM from target repository.' };
+const FETCH_DEPENDENCY_GRAPH_STATUS_404 = (error) => ({ message: `Could not find supplied resource: ${error}` });
 exports.FETCH_DEPENDENCY_GRAPH_STATUS_404 = FETCH_DEPENDENCY_GRAPH_STATUS_404;
-const FETCH_DEPENDENCY_GRAPH_STATUS_403 = (error) => ({
-    message: `Could not find access supplied resource: ${error}`,
-});
+const FETCH_DEPENDENCY_GRAPH_STATUS_403 = (error) => ({ message: `Could not find access supplied resource: ${error}` });
 exports.FETCH_DEPENDENCY_GRAPH_STATUS_403 = FETCH_DEPENDENCY_GRAPH_STATUS_403;
-exports.INVALID_ARGS_FOR_REPOSITORY_FETCH = {
-    message: "Missing required argument for generating SBOM from target repository.",
-};
-const REQUEST_BUILDER_ERROR_INSUFFICIENT_DATA = (error) => ({
-    message: `Could not successfully build request due to insufficient data: ${error}`,
-});
+exports.INVALID_ARGS_FOR_REPOSITORY_FETCH = { message: 'Missing required argument for generating SBOM from target repository.' };
+const REQUEST_BUILDER_ERROR_INSUFFICIENT_DATA = (error) => ({ message: `Could not successfully build request due to insufficient data: ${error}` });
 exports.REQUEST_BUILDER_ERROR_INSUFFICIENT_DATA = REQUEST_BUILDER_ERROR_INSUFFICIENT_DATA;
-const REQUEST_STATUS_ERROR_INSUFFICIENT_DATA = (error) => ({
-    message: `Could not perform status API request due to insufficient data: ${error}`,
-});
+const REQUEST_STATUS_ERROR_INSUFFICIENT_DATA = (error) => ({ message: `Could not perform status API request due to insufficient data: ${error}` });
 exports.REQUEST_STATUS_ERROR_INSUFFICIENT_DATA = REQUEST_STATUS_ERROR_INSUFFICIENT_DATA;
 
 
@@ -31518,31 +31494,29 @@ function setup() {
 }
 function _secretArguments() {
     return {
-        snSbomUser: core.getInput("snSbomUser"),
-        snSbomPassword: core.getInput("snSbomPassword"),
-        snInstanceUrl: core.getInput("snInstanceUrl"),
+        snSbomUser: core.getInput('snSbomUser'),
+        snSbomPassword: core.getInput('snSbomPassword'),
+        snInstanceUrl: core.getInput('snInstanceUrl')
     };
 }
 function _actionArguments() {
-    let maxStatusPollAttempts = Number(core.getInput("maxStatusPollAttempts"));
-    let statusAttemptInterval = Number(core.getInput("statusAttemptInterval"));
-    maxStatusPollAttempts =
-        maxStatusPollAttempts <= 0 ? 5 : maxStatusPollAttempts;
-    statusAttemptInterval =
-        statusAttemptInterval <= 1000 ? 10000 : statusAttemptInterval;
-    let bomRecordId = core.getInput("bomRecordId");
+    let maxStatusPollAttempts = Number(core.getInput('maxStatusPollAttempts'));
+    let statusAttemptInterval = Number(core.getInput('statusAttemptInterval'));
+    maxStatusPollAttempts = maxStatusPollAttempts <= 0 ? 5 : maxStatusPollAttempts;
+    statusAttemptInterval = statusAttemptInterval <= 1000 ? 10000 : statusAttemptInterval;
+    let bomRecordId = core.getInput('bomRecordId');
     if (bomRecordId.trim().length === 0) {
-        let failureMessage = "The bomRecordId action input is empty. Please provide a valid bomRecordId.";
+        let failureMessage = 'The bomRecordId action input is empty. Please provide a valid bomRecordId.';
         throw new Error(failureMessage);
     }
     return {
         secrets: _secretArguments(),
-        fetchPackageInfo: core.getInput("fetchPackageInfo") === "true",
-        fetchVulnerabilityInfo: core.getInput("fetchVulnerabilityInfo") === "true",
-        fetchLicenseInfo: core.getInput("fetchLicenseInfo") === "true",
+        fetchPackageInfo: core.getInput('fetchPackageInfo') === 'true',
+        fetchVulnerabilityInfo: core.getInput('fetchVulnerabilityInfo') === 'true',
+        fetchLicenseInfo: core.getInput('fetchLicenseInfo') === 'true',
         maxStatusPollAttempts,
         statusAttemptInterval,
-        bomRecordId,
+        bomRecordId
     };
 }
 
@@ -31577,8 +31551,8 @@ class ProgressBar {
         const progress = this.current / this.total;
         const filledBarLength = Math.round(this.width * progress);
         const emptyBarLength = this.width - filledBarLength;
-        const filledBar = "█".repeat(filledBarLength);
-        const emptyBar = "░".repeat(emptyBarLength);
+        const filledBar = '█'.repeat(filledBarLength);
+        const emptyBar = '░'.repeat(emptyBarLength);
         console.log(`Maximum Retries: [${filledBar}${emptyBar}] ${this.curNumRetries} of ${this.maxNumRetries}`);
     }
 }
@@ -31632,16 +31606,13 @@ async function generateValidationErrorSummary(errors) {
         return;
     }
     await core.summary
-        .addHeading("Invalid runtime arguments")
+        .addHeading('Invalid runtime arguments')
         .addTable([
         [
-            { data: "Property Name", header: true },
-            { data: "Error Message", header: true },
+            { data: 'Property Name', header: true },
+            { data: 'Error Message', header: true }
         ],
-        errors.flatMap((error) => [
-            `${error.instancePath.split("/").pop()}`,
-            `${error.message}`,
-        ]),
+        errors.flatMap(error => [`${error.instancePath.split('/').pop()}`, `${error.message}`])
     ])
         .write();
 }
@@ -31657,7 +31628,7 @@ async function validate(data, schema = schemas_1.SchemaType.action_inputs) {
     const validator = ajv.compile(jsonSchema);
     const isValid = validator(data);
     if (!isValid) {
-        if (main_1.process && main_1.process.env.NODE_ENV !== "test")
+        if (main_1.process && main_1.process.env.NODE_ENV !== 'test')
             await generateValidationErrorSummary(validator.errors);
         throw new Error((0, errors_1.INVALID_INPUT_VALUES)(validator.errors).message);
     }

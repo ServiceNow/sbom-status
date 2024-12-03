@@ -1,11 +1,11 @@
-import * as core from "@actions/core";
-import { setup } from "@/src/utils/setup";
-import { validate } from "@/src/utils/validate";
-import { SchemaType } from "@/src/types/schemas";
-import { status } from "@/src/api/status";
-import dotenv from "dotenv";
-dotenv.config();
-export var process: NodeJS.Process;
+import * as core from '@actions/core'
+import { setup } from '@/src/utils/setup'
+import { validate } from '@/src/utils/validate'
+import { SchemaType } from '@/src/types/schemas'
+import { status } from '@/src/api/status'
+import dotenv from 'dotenv'
+dotenv.config()
+export var process: NodeJS.Process
 
 /**
  * The main function for the action.
@@ -13,21 +13,17 @@ export var process: NodeJS.Process;
  */
 export async function run(): Promise<void> {
   try {
-    console.log("Hello, Sourav!");
-    const actionArguments = setup();
-    await validate(actionArguments, SchemaType.action_inputs);
+    const actionArguments = setup()
+    await validate(actionArguments, SchemaType.action_inputs)
 
-    let statusOperationResponseObject = await status(actionArguments);
+    let statusOperationResponseObject = await status(actionArguments)
     if (statusOperationResponseObject == undefined) {
-      return;
+      return
     } // Time out case, status function handles failing action
 
-    console.log("result", statusOperationResponseObject);
-    core.setOutput(
-      "apiResponseObject",
-      JSON.stringify(statusOperationResponseObject),
-    );
+    console.log('result', statusOperationResponseObject)
+    core.setOutput('apiResponseObject', JSON.stringify(statusOperationResponseObject))
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message);
+    if (error instanceof Error) core.setFailed(error.message)
   }
 }
