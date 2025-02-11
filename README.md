@@ -6,6 +6,7 @@ Use this action to upload and optionally check the status of the SBOM on Service
 >
 > - ServiceNow [Vulnerability Response](https://www.servicenow.com/products/vulnerability-response.html#features)
 > - Vulnerability Response [technical documentation](https://docs.servicenow.com/bundle/tokyo-security-management/page/product/vulnerability-response/reference/vuln-landing-page.html)
+> - Software Bill of Materials [documentation](https://www.servicenow.com/docs/bundle/xanadu-security-management/page/product/secops-integration-vr/sbom/reference/sbom-landing.html)
 
 # Usage
 
